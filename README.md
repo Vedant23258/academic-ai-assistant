@@ -17,6 +17,22 @@
 - LaTeX support for mathematical expressions
 
 ### 📄 Document Creation
+
+### 🎯 Smart Learning Resource Finder
+- Search any topic/subject and get curated learning resources
+- YouTube video recommendations with ratings
+- Article and tutorial suggestions
+- Course recommendations from top platforms
+- Difficulty-based filtering (Beginner/Intermediate/Advanced)
+- Save favorite resources to your profile
+
+### 👤 User Authentication & Personalization
+- Secure signup/login system with JWT tokens
+- Personalized dashboard for each user
+- Save and track your learning progress
+- History of solved problems and generated documents
+- Bookmarked topics and resources
+- Profile management and preferences
 - **PDF Generator**: Create professional academic documents
 - **PPT Maker**: Generate presentations with multiple templates
 - Export solutions and study materials
