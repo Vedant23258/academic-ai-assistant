@@ -1,48 +1,39 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import './Sidebar.css';
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Divider } from '@mui/material';
+import { Home, Chat, Calculate, Note, Description, School } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
-const Sidebar = () => {
+const Sidebar = ({ open, onClose }) => {
   const navigate = useNavigate();
-  const location = useLocation();
-
   const menuItems = [
-    { path: '/dashboard', icon: '🏠', label: 'Dashboard' },
-    { path: '/ai-chat', icon: '💬', label: 'AI Chat' },
-    { path: '/math-solver', icon: '🔢', label: 'Math Solver' },
-    { path: '/notes', icon: '📝', label: 'Notes' },
-    { path: '/document-generator', icon: '📄', label: 'Documents' },
-    { path: '/handwriting', icon: '✍️', label: 'Handwriting' },
+    { label: 'Dashboard', icon: <Home />, path: '/' },
+    { label: 'AI Chat', icon: <Chat />, path: '/chat' },
+    { label: 'Math Solver', icon: <Calculate />, path: '/solver' },
+    { label: 'Notes', icon: <Note />, path: '/notes' },
+    { label: 'Documents', icon: <Description />, path: '/documents' },
+    { label: 'Courses', icon: <School />, path: '/courses' },
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
-
   return (
-    <div className="sidebar">
-      <div className="sidebar-header">
-        <h2>Academic AI</h2>
-      </div>
-      <nav className="sidebar-nav">
-        {menuItems.map((item) => (
-          <div
-            key={item.path}
-            className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
-            onClick={() => navigate(item.path)}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            <span className="nav-label">{item.label}</span>
-          </div>
-        ))}
-      </nav>
-      <div className="sidebar-footer">
-        <button className="logout-btn" onClick={handleLogout}>
-          🚪 Logout
-        </button>
-      </div>
-    </div>
+    <Drawer anchor="left" open={open} onClose={onClose}>
+      <Box sx={{ width: 250 }} role="presentation">
+        <Box sx={{ p: 2, bgcolor: 'primary.main', color: 'white' }}>
+          <Typography variant="h6" fontWeight={600}>Academic AI</Typography>
+          <Typography variant="caption">Your Study Assistant</Typography>
+        </Box>
+        <Divider />
+        <List>
+          {menuItems.map((item, index) => (
+            <ListItem key={index} disablePadding>
+              <ListItemButton onClick={() => { navigate(item.path); onClose(); }}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
+    </Drawer>
   );
 };
 
