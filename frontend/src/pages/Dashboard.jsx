@@ -1,56 +1,156 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Box, Container, Grid, Card, CardContent, CardActions, Typography, Button, Avatar, Paper } from "@mui/material";
-import { Chat, Calculate, Description, Draw, Note, AutoStories, TipsAndUpdates, School } from "@mui/icons-material";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
+import React, { useState } from 'react';
+import { Box, Container, TextField, IconButton, Typography, Paper, Avatar, Fade } from '@mui/material';
+import { Send, AutoAwesome, LightMode, DarkMode } from '@mui/icons-material';
+import Sidebar from '../components/Sidebar';
+import Topbar from '../components/Topbar';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState([]);
 
-  const features = [
-    { title: "AI Chat Assistant", description: "Get instant help with your academic questions", icon: Chat, color: "#1976d2", route: "/chat" },
-    { title: "Math Solver", description: "Solve complex mathematical problems", icon: Calculate, color: "#2e7d32", route: "/solver" },
-    { title: "Document Generator", description: "Create PDFs and presentations", icon: Description, color: "#ed6c02", route: "/documents" },
-    { title: "Handwriting Converter", description: "Convert handwritten notes to text", icon: Draw, color: "#9c27b0", route: "/handwriting" },
-    { title: "Smart Notes", description: "Organize and manage study notes", icon: Note, color: "#0288d1", route: "/notes" },
-    { title: "Study Resources", description: "Access curated study materials", icon: AutoStories, color: "#d32f2f", route: "/resources" },
-    { title: "Learning Tips", description: "Get personalized study tips", icon: TipsAndUpdates, color: "#7b1fa2", route: "/tips" },
-    { title: "Course Assistant", description: "Track courses and assignments", icon: School, color: "#1565c0", route: "/courses" },
-  ];
+  const handleSend = () => {
+    if (message.trim()) {
+      setMessages([...messages, { text: message, sender: 'user' }]);
+      setMessage('');
+      
+      // Simulate AI response
+      setTimeout(() => {
+        setMessages(prev => [...prev, { 
+          text: 'I am your Academic AI Assistant! How can I help you with your studies today?', 
+          sender: 'ai' 
+        }]);
+      }, 1000);
+    }
+  };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#0f0f0f' }}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+      
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
-          <Paper elevation={0} sx={{ p: 4, mb: 4, background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)", color: "white", borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ fontWeight: 700 }}>Welcome to Academic AI Assistant</Typography>
-            <Typography variant="h6" sx={{ opacity: 0.95 }}>Your intelligent companion for academic excellence</Typography>
+        
+        <Container maxWidth="md" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', py: 3 }}>
+          {messages.length === 0 ? (
+            <Box sx={{ 
+              flexGrow: 1, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              textAlign: 'center'
+            }}>
+              <Fade in timeout={1000}>
+                <Box>
+                  <Avatar sx={{ 
+                    width: 100, 
+                    height: 100, 
+                    margin: '0 auto 24px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.4)'
+                  }}>
+                    <AutoAwesome sx={{ fontSize: 50 }} />
+                  </Avatar>
+                  
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 700, 
+                    mb: 2,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                    Ask Me Anything
+                  </Typography>
+                  
+                  <Typography variant="h6" color="text.secondary" sx={{ mb: 4, maxWidth: 600 }}>
+                    Your intelligent academic companion powered by AI. Ask questions, solve problems, get instant help.
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {[
+                      'Solve this math problem',
+                      'Explain quantum physics',
+                      'Write an essay outline',
+                      'Help with chemistry'
+                    ].map((suggestion, i) => (
+                      <Paper key={i} sx={{
+                        px: 3,
+                        py: 1.5,
+                        cursor: 'pointer',
+                        bgcolor: 'rgba(102, 126, 234, 0.1)',
+                        border: '1px solid rgba(102, 126, 234, 0.3)',
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          bgcolor: 'rgba(102, 126, 234, 0.2)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                        }
+                      }}
+                      onClick={() => setMessage(suggestion)}>
+                        <Typography variant="body2" color="primary">{suggestion}</Typography>
+                      </Paper>
+                    ))}
+                  </Box>
+                </Box>
+              </Fade>
+            </Box>
+          ) : (
+            <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 2 }}>
+              {messages.map((msg, i) => (
+                <Fade in key={i} timeout={500}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                    mb: 2
+                  }}>
+                    <Paper sx={{
+                      p: 2,
+                      maxWidth: '70%',
+                      bgcolor: msg.sender === 'user' ? 'primary.main' : 'background.paper',
+                      color: msg.sender === 'user' ? 'white' : 'text.primary'
+                    }}>
+                      <Typography>{msg.text}</Typography>
+                    </Paper>
+                  </Box>
+                </Fade>
+              ))}
+            </Box>
+          )}
+          
+          <Paper sx={{
+            p: 2,
+            display: 'flex',
+            gap: 1,
+            bgcolor: 'background.paper',
+            borderRadius: 3,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.1)'
+          }}>
+            <TextField
+              fullWidth
+              placeholder="Ask me anything..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              variant="standard"
+              InputProps={{ disableUnderline: true }}
+              sx={{ '& input': { fontSize: '1.1rem' } }}
+            />
+            <IconButton 
+              color="primary" 
+              onClick={handleSend}
+              disabled={!message.trim()}
+              sx={{
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': { bgcolor: 'primary.dark' },
+                '&:disabled': { bgcolor: 'action.disabledBackground' }
+              }}
+            >
+              <Send />
+            </IconButton>
           </Paper>
-          <Grid container spacing={3}>
-            {features.map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                  <Card sx={{ height: "100%", cursor: "pointer" }} onClick={() => navigate(feature.route)}>
-                    <CardContent sx={{ textAlign: "center", pt: 4 }}>
-                      <Avatar sx={{ bgcolor: feature.color, width: 80, height: 80, margin: "0 auto", mb: 2 }}>
-                        <Icon sx={{ fontSize: 40 }} />
-                      </Avatar>
-                      <Typography variant="h5" gutterBottom fontWeight={600}>{feature.title}</Typography>
-                      <Typography variant="body2" color="text.secondary">{feature.description}</Typography>
-                    </CardContent>
-                    <CardActions sx={{ justifyContent: "center", pb: 3 }}>
-                      <Button variant="contained" sx={{ bgcolor: feature.color }}>Open</Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
         </Container>
       </Box>
     </Box>
