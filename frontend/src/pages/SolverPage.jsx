@@ -26,4 +26,4 @@ const SolverPage = () => {
     </Box>
   );
 };
-export default SolverPage;Create SolverPage
+export default SolverPage;
