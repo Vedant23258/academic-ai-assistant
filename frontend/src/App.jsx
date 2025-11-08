@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import theme from "./theme";
@@ -13,17 +13,15 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/chat" element={<AiChatPage />} />
-          <Route path="/solver" element={<SolverPage />} />
-          <Route path="/notes" element={<NotesPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/chat" element={<AiChatPage />} />
+        <Route path="/solver" element={<SolverPage />} />
+        <Route path="/notes" element={<NotesPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </ThemeProvider>
   );
 }
