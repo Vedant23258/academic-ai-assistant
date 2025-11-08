@@ -2,76 +2,52 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
-    mode: 'light',
+    mode: 'dark',
     primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
-      contrastText: '#fff',
+      main: '#8B7DD8',
+      light: '#A898E8',
+      dark: '#764ba2',
     },
     secondary: {
-      main: '#9c27b0',
-      light: '#ba68c8',
-      dark: '#7b1fa2',
-      contrastText: '#fff',
-    },
-    success: {
-      main: '#2e7d32',
-      light: '#4caf50',
-      dark: '#1b5e20',
+      main: '#667eea',
+      light: '#8B94F0',
+      dark: '#5568D3',
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: '#0a0a0a',
+      paper: '#1a1a1a',
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575',
+      primary: '#ffffff',
+      secondary: '#b0b0b0',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h3: {
-      fontSize: '2.5rem',
-      fontWeight: 600,
-      lineHeight: 1.2,
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h6: {
+      fontWeight: 700,
     },
-    h5: {
-      fontSize: '1.25rem',
-      fontWeight: 500,
-      lineHeight: 1.5,
-    },
-    button: {
-      textTransform: 'none',
-      fontWeight: 500,
-    },
-  },
-  shape: {
-    borderRadius: 12,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          padding: '10px 24px',
-          boxShadow: 'none',
+          borderRadius: '12px',
+          textTransform: 'none',
+          fontWeight: 600,
+          transition: 'all 0.3s ease',
           '&:hover': {
-            boxShadow: '0px 4px 12px rgba(0,0,0,0.15)',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 8px 24px rgba(139, 125, 216, 0.4)',
           },
         },
       },
     },
-    MuiCard: {
+    MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
-          boxShadow: '0px 4px 20px rgba(0,0,0,0.08)',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            boxShadow: '0px 8px 30px rgba(0,0,0,0.12)',
-            transform: 'translateY(-4px)',
-          },
+          backgroundImage: 'none',
+          borderRadius: '16px',
         },
       },
     },
