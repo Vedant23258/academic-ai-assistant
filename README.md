@@ -153,7 +153,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👨‍💻 Author
 
-**Vedant Patel**
+**Vedant Mishra**
 - GitHub: [@Vedant23258](https://github.com/Vedant23258)
 
 ## 🙏 Acknowledgments
