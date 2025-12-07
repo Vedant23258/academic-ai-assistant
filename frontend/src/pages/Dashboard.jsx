@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Container, TextField, IconButton, Typography, Paper, Avatar, Fade } from '@mui/material';
+Grid, import { Box, Container, TextField, IconButton, Typography, Paper, Avatar, Fade } from '@mui/material';
 import { Send, AutoAwesome, LightMode, DarkMode } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
@@ -33,6 +33,37 @@ const Dashboard = () => {
         
         <Container maxWidth="md" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', py: 3 }}>
           {messages.length === 0 ? (
+           {/* Feature Showcase */}
+     <Grid container spacing={2} sx={{ mb: 4 }}>
+       {[
+         { icon: '🤖', title: 'AI Chat', desc: 'Ask questions, get instant answers' },
+         { icon: '🔢', title: 'Math Solver', desc: 'Solve complex math problems' },
+         { icon: '📝', title: 'Document Generator', desc: 'Create essays & reports' },
+         { icon: '✍️', title: 'Handwriting Converter', desc: 'Text to beautiful handwriting' },
+       ].map((feature, i) => (
+         <Grid item xs={12} sm={6} md={3} key={i}>
+           <Paper sx={{
+             p: 2,
+             textAlign: 'center',
+             background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+             border: '1px solid rgba(102, 126, 234, 0.2)',
+             borderRadius: 2,
+             transition: 'all 0.3s ease',
+             cursor: 'pointer',
+             '&:hover': {
+               transform: 'translateY(-4px)',
+               boxShadow: '0 8px 24px rgba(102, 126, 234, 0.3)',
+               borderColor: 'rgba(102, 126, 234, 0.5)',
+             }
+           }}>
+             <Typography sx={{ fontSize: '2.5rem', mb: 1 }}>{feature.icon}</Typography>
+             <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>{feature.title}</Typography>
+             <Typography variant="caption" sx={{ color: 'text.secondary' }}>{feature.desc}</Typography>
+           </Paper>
+         </Grid>
+       ))}
+     </Grid>
+
             <Box sx={{ 
               flexGrow: 1, 
               display: 'flex', 
