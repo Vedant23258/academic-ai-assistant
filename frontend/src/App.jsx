@@ -8,6 +8,8 @@ import SolverPage from "./pages/SolverPage";
 import NotesPage from "./pages/NotesPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import DocumentGeneratorPage from "./pages/DocumentGeneratorPage";
+import HandwritingConverterPage from "./pages/HandwritingConverterPage";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+                  <Route path="/documents" element={<DocumentGeneratorPage />} />
+          <Route path="/handwriting" element={<HandwritingConverterPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ThemeProvider>
