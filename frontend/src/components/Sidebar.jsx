@@ -1,6 +1,6 @@
 import React from 'react';
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Divider, Avatar } from '@mui/material';
-import { Home, Chat, Calculate, Note, Description, School, AutoAwesome } from '@mui/icons-material';
+import { Home, Chat, Calculate, Note, Description, School, Edit, AutoAwesome } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ open, onClose }) => {
@@ -14,6 +14,8 @@ const Sidebar = ({ open, onClose }) => {
     { label: 'Documents', icon: <Description />, path: '/documents' },
     { label: 'Courses', icon: <School />, path: '/courses' },
   ];
+      { label: 'Handwriting Converter', icon: <Edit />, path: '/handwriting' },
+      { label: 'PDF/PPT Generator', icon: <Description />, path: '/documents-generator' },
 
   return (
     <Drawer anchor="left" open={open} onClose={onClose}>
