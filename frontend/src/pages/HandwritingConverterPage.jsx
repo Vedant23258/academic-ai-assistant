@@ -4,99 +4,89 @@ import {
   Typography,
   Box,
   Paper,
+  TextField,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Alert,
-  CircularProgress,
-  Grid,
-  Card,
-  CardContent,
-  IconButton
+  CircularProgress
 } from '@mui/material';
-import { CloudUpload, ContentCopy, Download } from '@mui/icons-material';
+import { Download, ContentCopy } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
 
+const FONTS = {
+  casual: { name: 'Indie Flower', weight: '400' },
+  script: { name: 'Caveat', weight: '700' },
+  sketch: { name: 'Fredoka', weight: '400' },
+  marker: { name: 'Markerfield', weight: '400' },
+  handwrite: { name: 'Satisfy', weight: '400' }
+};
+
 const HandwritingConverterPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [convertedText, setConvertedText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [text, setText] = useState('');
+  const [font, setFont] = useState('casual');
   const [copied, setCopied] = useState(false);
-  const fileInputRef = useRef(null);
-  const backendURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+  const canvasRef = useRef(null);
 
-  const handleImageSelect = (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setSelectedImage(e.target?.result);
-        setConvertedText('');
-        setError('');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const generateHandwriting = () => {
+    if (!text.trim() || !canvasRef.current) return;
 
-  const handleConvert = async () => {
-    if (!selectedImage) {
-      setError('Please select an image first');
-      return;
-    }
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const fontStyle = FONTS[font];
 
-    setLoading(true);
-    setError('');
+    canvas.width = 800;
+    canvas.height = Math.max(300, Math.ceil(text.split('\n').length * 50));
 
-    try {
-      const response = await fetch(`${backendURL}/api/ocr/convert`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image: selectedImage
-        })
-      });
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#333333';
+    ctx.font = `${fontStyle.weight} 32px "${fontStyle.name}", cursive`;
+    ctx.lineHeight = '1.6';
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    const lines = text.split('\n');
+    let y = 50;
 
-      const data = await response.json();
-
-      if (data.success && data.text) {
-        setConvertedText(data.text);
-      } else {
-        setError(data.message || 'Failed to convert handwriting');
-      }
-    } catch (err) {
-      console.error('Error:', err);
-      setError('Failed to convert handwriting. Please check your connection and try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(convertedText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    lines.forEach((line) => {
+      ctx.fillText(line, 40, y);
+      y += 50;
+    });
   };
 
   const handleDownload = () => {
-    if (!convertedText) return;
-
-    const blob = new Blob([convertedText], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'handwriting_converted.txt';
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'handwriting.png';
+    link.click();
   };
+
+  const handleCopy = () => {
+    if (!canvasRef.current) return;
+    canvasRef.current.toBlob((blob) => {
+      navigator.clipboard
+        .write([
+          new ClipboardItem({
+            'image/png': blob
+          })
+        ])
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        });
+    });
+  };
+
+  React.useEffect(() => {
+    if (text.trim()) {
+      generateHandwriting();
+    }
+  }, [text, font]);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -104,145 +94,70 @@ const HandwritingConverterPage = () => {
       <Box sx={{ flexGrow: 1 }}>
         <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
         <Container maxWidth="lg" sx={{ py: 4 }}>
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 2 }}>
-              ✍️ Handwriting Converter
-            </Typography>
-            <Typography color="text.secondary" sx={{ mt: 1 }}>
-              Convert handwritten text from images to digital text using OCR
-            </Typography>
-          </Box>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 4 }}>
+            ✍️ Text to Handwriting Converter
+          </Typography>
+          <Typography color="text.secondary" sx={{ mb: 4 }}>
+            Convert your text to beautiful handwritten style
+          </Typography>
 
-          <Grid container spacing={3}>
-            {/* Upload Section */}
-            <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 3 }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                  Select Image
-                </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+            {/* Input Section */}
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                Text Input
+              </Typography>
 
-                <Box
-                  onClick={() => fileInputRef.current?.click()}
-                  sx={{
-                    border: '2px dashed',
-                    borderColor: 'primary.main',
-                    borderRadius: 2,
-                    p: 4,
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    bgcolor: 'rgba(25, 118, 210, 0.05)',
-                    transition: 'all 0.3s',
-                    '&:hover': {
-                      bgcolor: 'rgba(25, 118, 210, 0.1)',
-                      borderColor: 'primary.dark'
-                    }
-                  }}
-                >
-                  <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    {selectedImage ? 'Change Image' : 'Click to select an image'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    JPG, PNG or GIF - Max 10MB
-                  </Typography>
-                </Box>
+              <TextField
+                fullWidth
+                multiline
+                rows={8}
+                placeholder="Type your text here..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                variant="outlined"
+                sx={{ mb: 2 }}
+              />
 
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  style={{ display: 'none' }}
-                />
+              <FormControl fullWidth sx={{ mb: 2 }}>
+                <InputLabel>Handwriting Style</InputLabel>
+                <Select value={font} label="Handwriting Style" onChange={(e) => setFont(e.target.value)}>
+                  <MenuItem value="casual">Casual (Indie Flower)</MenuItem>
+                  <MenuItem value="script">Script (Caveat)</MenuItem>
+                  <MenuItem value="sketch">Sketch (Fredoka)</MenuItem>
+                  <MenuItem value="marker">Marker Style (Markerfield)</MenuItem>
+                  <MenuItem value="handwrite">Elegant (Satisfy)</MenuItem>
+                </Select>
+              </FormControl>
 
-                {selectedImage && (
-                  <Box sx={{ mt: 3 }}>
-                    <img
-                      src={selectedImage}
-                      alt="Selected"
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '300px',
-                        borderRadius: '8px',
-                        marginBottom: '16px'
-                      }}
-                    />
-                  </Box>
-                )}
+              {copied && <Alert severity="success" sx={{ mb: 2 }}>Copied to clipboard!</Alert>}
 
-                {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-
-                <Button
-                  variant="contained"
-                  fullWidth
-                  size="large"
-                  onClick={handleConvert}
-                  disabled={loading || !selectedImage}
-                  sx={{ mt: 3 }}
-                >
-                  {loading ? <CircularProgress size={24} /> : 'Convert Handwriting'}
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button variant="contained" fullWidth startIcon={<Download />} onClick={handleDownload} disabled={!text.trim()}>
+                  Download
                 </Button>
-              </Paper>
-            </Grid>
+                <Button variant="outlined" fullWidth startIcon={<ContentCopy />} onClick={handleCopy} disabled={!text.trim()}>
+                  Copy
+                </Button>
+              </Box>
+            </Paper>
 
-            {/* Result Section */}
-            <Grid item xs={12} md={6}>
-              {convertedText ? (
-                <Paper sx={{ p: 3, height: '100%' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                      Converted Text
-                    </Typography>
-                    <Box>
-                      <IconButton
-                        size="small"
-                        onClick={handleCopy}
-                        title={copied ? 'Copied!' : 'Copy'}
-                      >
-                        <ContentCopy />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={handleDownload}
-                        title="Download"
-                      >
-                        <Download />
-                      </IconButton>
-                    </Box>
-                  </Box>
-
-                  {copied && <Alert severity="success" sx={{ mb: 2 }}>Copied to clipboard!</Alert>}
-
-                  <Box
-                    sx={{
-                      bgcolor: '#f5f5f5',
-                      p: 2,
-                      borderRadius: 1,
-                      minHeight: '300px',
-                      maxHeight: '400px',
-                      overflowY: 'auto',
-                      whiteSpace: 'pre-wrap',
-                      wordWrap: 'break-word',
-                      fontFamily: 'monospace',
-                      fontSize: '0.9rem',
-                      lineHeight: 1.6
-                    }}
-                  >
-                    {convertedText}
-                  </Box>
-                </Paper>
+            {/* Preview Section */}
+            <Paper sx={{ p: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                Preview
+              </Typography>
+              {text.trim() ? (
+                <Box sx={{ bgcolor: '#f5f5f5', p: 2, borderRadius: 1, overflow: 'auto', maxHeight: '500px' }}>
+                  <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />
+                </Box>
               ) : (
-                <Card sx={{ bgcolor: 'rgba(25, 118, 210, 0.05)', border: '2px dashed', borderColor: 'primary.main', height: '100%' }}>
-                  <CardContent sx={{ textAlign: 'center', py: 8 }}>
-                    <Typography variant="h6" color="text.secondary">
-                      {loading ? 'Converting handwriting...' : 'Converted text will appear here'}
-                    </Typography>
-                    {loading && <CircularProgress sx={{ mt: 3 }} />}
-                  </CardContent>
-                </Card>
+                <Box sx={{ bgcolor: '#f5f5f5', p: 4, borderRadius: 1, textAlign: 'center', minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Typography color="text.secondary">Your handwriting preview will appear here...</Typography>
+                </Box>
               )}
-            </Grid>
-          </Grid>
+            </Paper>
+          </Box>
         </Container>
       </Box>
     </Box>
