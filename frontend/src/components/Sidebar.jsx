@@ -16,7 +16,7 @@ const Sidebar = ({ open, onClose }) => {
      { label: 'Handwriting Converter', icon: <Edit />, path: '/handwriting' },
      { label: 'PDF/PPT Generator', icon: <Description />, path: '/documents-generator' },
      ];
-   return 
+   return ( 
     <Drawer anchor="left" open={open} onClose={onClose}>
       <Box sx={{ 
         width: 250, 
