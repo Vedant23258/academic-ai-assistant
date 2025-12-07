@@ -4,7 +4,6 @@ import { Calculate } from '@mui/icons-material';
 import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
 
-// Client-side math solver
 const solveMathProblem = (problem) => {
   try {
     if (problem.includes('=')) {
@@ -15,14 +14,13 @@ const solveMathProblem = (problem) => {
         const constMatch = left.match(/([+-]\s*\d+\.?\d*)(?!.*x)/);
         const constant = constMatch ? parseFloat(constMatch[1]) : 0;
         const result = (eval(right) - constant) / coef;
-        return `Solution: x = ${result.toFixed(2)}`;
+        return `x = ${result.toFixed(2)}`;
       }
     }
-    const sanitized = problem.replace(/\^/g, '**');
-    const result = eval(sanitized);
+    const result = eval(problem.replace(/\^/g, '**'));
     return `Result: ${result}`;
-  } catch (err) {
-    return `Error: Could not solve "${problem}". Try: 2+2, 5*3, 2x+5=13`;
+  } catch {
+    return `Error: Invalid input`;
   }
 };
 
@@ -31,54 +29,17 @@ const SolverPage = () => {
   const [problem, setProblem] = useState('');
   const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSolve = async () => {
-    if (!problem.trim()) {
-      setError('Please enter a math problem');
-      return;
-    }
-
+    if (!problem.trim()) return;
     setLoading(true);
-    setError('');
     setSolution(null);
-
-    try {
-      let result = null;
-      const backendURL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      
-      // Try backend with 3 second timeout
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
-        const response = await fetch(`${backendURL}/api/math/solve`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ problem }),
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (response.ok) {
-          const data = await response.json();
-          result = data.solution || data;
-        } else {
-          throw new Error('Backend error');
-        }
-      } catch (backendErr) {
-        // Fallback to client-side solver
-        console.log('Using client solver');
-        result = solveMathProblem(problem);
-      }
-      
+    
+    setTimeout(() => {
+      const result = solveMathProblem(problem);
       setSolution(result);
-    } catch (err) {
-      setError('Error: ' + err.message);
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -94,16 +55,16 @@ const SolverPage = () => {
             <Typography variant="h4" gutterBottom fontWeight={600}>
               Math Solver
             </Typography>
-            <Typography color="text.secondary" sx={{ mb: 2 }}>
-              Solve equations, calculate expressions, and simplify math
+            <Typography color="text.secondary" sx={{ mb: 3 }}>
+              Solve equations & calculate expressions
             </Typography>
             <Typography variant="caption" color="info.main" sx={{ mb: 3, display: 'block' }}>
-              Examples: 2+3, 5*6, 2x+5=13, 2^3
+              Examples: 5+3, 10*2, 2x+5=13, 2^3
             </Typography>
 
             <TextField
               fullWidth
-              placeholder="Enter math problem (e.g., 2x + 5 = 13 or 2 + 2 * 3)"
+              placeholder="e.g., 2x + 5 = 13 or 5 + 3"
               sx={{ mb: 2 }}
               multiline
               rows={3}
@@ -121,13 +82,11 @@ const SolverPage = () => {
             >
               {loading ? <CircularProgress size={24} /> : 'Solve'}
             </Button>
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
             {solution && (
-              <Paper sx={{ p: 3, bgcolor: 'success.light', mt: 2, textAlign: 'left', borderLeft: '4px solid green' }}>
-                <Typography variant="h6" fontWeight={600} sx={{ color: 'success.dark' }}>✓ Solution:</Typography>
-                <Typography sx={{ mt: 2, fontFamily: 'monospace', fontSize: '1.1em' }}>
-                  {typeof solution === 'string' ? solution : JSON.stringify(solution, null, 2)}
+              <Paper sx={{ p: 3, bgcolor: 'success.light', mt: 2, textAlign: 'center', borderLeft: '4px solid green' }}>
+                <Typography variant="h6" fontWeight={600} sx={{ color: 'success.dark' }}>
+                  ✓ {solution}
                 </Typography>
               </Paper>
             )}
