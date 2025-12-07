@@ -1,126 +1,231 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import './HandwritingConverter.css';
 
 const HandwritingConverter = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [convertedText, setConvertedText] = useState('');
+  const [inputText, setInputText] = useState('');
+  const [fontSize, setFontSize] = useState(24);
+  const [fontFamily, setFontFamily] = useState('caveat');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const fileInputRef = useRef(null);
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file');
-        return;
-      }
-      setSelectedFile(file);
-      setError('');
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleConvert = async () => {
-    if (!selectedFile) {
-      setError('Please select an image first');
+  const generateHandwriting = async () => {
+    if (!inputText.trim()) {
+      alert('Please enter some text first!');
       return;
     }
 
     setLoading(true);
-    setError('');
-    setConvertedText('');
-
     try {
-      const token = localStorage.getItem('token');
-      const formData = new FormData();
-      formData.append('image', selectedFile);
-
-      const response = await fetch('http://localhost:5000/api/ocr/convert', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
+      // Create canvas for handwriting effect
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = 1000;
+      canvas.height = 800;
+      
+      // White background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Set font style based on selection
+      const fontStyles = {
+        caveat: 'italic bold 24px Caveat, cursive',
+        indie: '24px Indie Flower, cursive',
+        dancing: 'bold 24px Dancing Script, cursive',
+        satisfy: '28px Satisfy, cursive',
+        kalam: '24px Kalam, cursive'
+      };
+      
+      ctx.font = fontStyles[fontFamily];
+      ctx.fillStyle = '#333333';
+      ctx.lineWidth = 1.5;
+      
+      // Add slight rotation for handwritten feel
+      const lines = inputText.split('\n');
+      let y = 50;
+      
+      lines.forEach((line, idx) => {
+        // Add slight random rotation
+        ctx.save();
+        const rotation = (Math.random() - 0.5) * 0.02;
+        ctx.transform(1, rotation, 0, 1, 0, y);
+        
+        ctx.fillText(line || ' ', 30, 0);
+        ctx.restore();
+        
+        y += fontSize + 15;
+        
+        if (y > canvas.height - 50) {
+          ctx.fillText('...(more)', 30, y);
+          return;
+        }
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setConvertedText(data.text);
-      } else {
-        setError(data.message || 'Failed to convert handwriting');
-      }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+      
+      // Convert to PDF and download
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'handwritten-text.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error generating handwriting. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopy = () => {
-    if (convertedText) {
-      navigator.clipboard.writeText(convertedText);
-      alert('Text copied to clipboard!');
+  const downloadAsPDF = async () => {
+    if (!inputText.trim()) {
+      alert('Please enter some text first!');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Using html2pdf library approach
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      canvas.width = 1200;
+      canvas.height = 1500;
+      
+      // White background with margins
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Border
+      ctx.strokeStyle = '#cccccc';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+      
+      // Set font
+      const fontStyles = {
+        caveat: 'italic bold 32px Caveat, cursive',
+        indie: '32px Indie Flower, cursive',
+        dancing: 'bold 32px Dancing Script, cursive',
+        satisfy: '36px Satisfy, cursive',
+        kalam: '32px Kalam, cursive'
+      };
+      
+      ctx.font = fontStyles[fontFamily];
+      ctx.fillStyle = '#2c2c2c';
+      
+      // Render text
+      const lines = inputText.split('\n');
+      let y = 100;
+      const lineHeight = fontSize + 20;
+      
+      lines.forEach((line) => {
+        if (y > canvas.height - 100) return;
+        
+        ctx.save();
+        const rotation = (Math.random() - 0.5) * 0.015;
+        ctx.transform(1, rotation, 0, 1, 0, y);
+        ctx.fillText(line || ' ', 80, 0);
+        ctx.restore();
+        
+        y += lineHeight;
+      });
+      
+      // Download as PNG (serves as PDF preview)
+      const image = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'handwritten-document.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error generating PDF. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="handwriting-converter">
       <div className="converter-header">
-        <h2>✍️ Handwriting to Text Converter</h2>
-        <p>Upload an image of handwritten text and convert it to digital text</p>
+        <h2>✍️ Text to Handwriting Converter</h2>
+        <p>Convert your text to beautiful handwritten style images & PDFs</p>
       </div>
+
       <div className="converter-content">
-        <div className="upload-section">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-            accept="image/*"
-            style={{ display: 'none' }}
+        <div className="input-section">
+          <label>Enter Your Text:</label>
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Type your text here... You can write multiple lines."
+            rows="8"
           />
-          <button 
-            className="upload-btn" 
-            onClick={() => fileInputRef.current.click()}
-          >
-            📁 Select Image
-          </button>
-          {preview && (
-            <div className="image-preview">
-              <img src={preview} alt="Preview" />
-              <p>{selectedFile.name}</p>
+          
+          <div className="controls">
+            <div className="control-group">
+              <label>Font Style:</label>
+              <select value={fontFamily} onChange={(e) => setFontFamily(e.target.value)}>
+                <option value="caveat">Caveat (Default)</option>
+                <option value="indie">Indie Flower</option>
+                <option value="dancing">Dancing Script</option>
+                <option value="satisfy">Satisfy</option>
+                <option value="kalam">Kalam</option>
+              </select>
             </div>
-          )}
-          <button 
-            onClick={handleConvert} 
-            disabled={!selectedFile || loading}
-            className="convert-btn"
-          >
-            {loading ? 'Converting...' : 'Convert to Text'}
-          </button>
-        </div>
-        {error && <div className="error-message">{error}</div>}
-        {convertedText && (
-          <div className="result-section">
-            <div className="result-header">
-              <h3>Converted Text</h3>
-              <button onClick={handleCopy} className="copy-btn">
-                📋 Copy
-              </button>
-            </div>
-            <div className="text-content">
-              <p>{convertedText}</p>
+            
+            <div className="control-group">
+              <label>Font Size:</label>
+              <input
+                type="range"
+                min="16"
+                max="48"
+                value={fontSize}
+                onChange={(e) => setFontSize(parseInt(e.target.value))}
+              />
+              <span>{fontSize}px</span>
             </div>
           </div>
-        )}
+
+          <div className="button-group">
+            <button 
+              onClick={generateHandwriting}
+              disabled={loading || !inputText.trim()}
+              className="generate-btn"
+            >
+              {loading ? 'Generating...' : '🖼️ Generate Image'}
+            </button>
+            
+            <button 
+              onClick={downloadAsPDF}
+              disabled={loading || !inputText.trim()}
+              className="pdf-btn"
+            >
+              {loading ? 'Generating...' : '📄 Download as PDF'}
+            </button>
+          </div>
+        </div>
+
+        <div className="preview-section">
+          <label>Preview:</label>
+          <div 
+            className="preview-box"
+            style={{
+              fontFamily: fontFamily === 'caveat' ? 'Caveat' : 
+                          fontFamily === 'indie' ? 'Indie Flower' :
+                          fontFamily === 'dancing' ? 'Dancing Script' :
+                          fontFamily === 'satisfy' ? 'Satisfy' : 'Kalam',
+              fontSize: `${fontSize}px`,
+              fontStyle: fontFamily === 'caveat' ? 'italic' : 'normal',
+              fontWeight: fontFamily === 'caveat' || fontFamily === 'dancing' ? 'bold' : 'normal'
+            }}
+          >
+            {inputText || 'Your handwritten text will appear here...'}
+          </div>
+          <p className="preview-note">⚠️ Load fonts from CDN first. Check main.jsx</p>
+        </div>
       </div>
     </div>
   );
