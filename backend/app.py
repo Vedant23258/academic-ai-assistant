@@ -18,8 +18,19 @@ CORS(app)
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
 
-# Import routes (will be created later)
-# from routes import auth, math_solver, resources, documents
+# Import routes
+from routes.auth import auth_bp
+from routes.ai_chat import ai_chat_bp
+from routes.ocr import ocr_bp
+from routes.solver import solver_bp
+from routes.resources import resources_bp
+
+# Register blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(ai_chat_bp)
+app.register_blueprint(ocr_bp)
+app.register_blueprint(solver_bp)
+app.register_blueprint(resources_bp)
 
 @app.route('/')
 def home():
@@ -28,9 +39,10 @@ def home():
         'version': '1.0.0',
         'endpoints': {
             'auth': '/api/auth',
-            'math': '/api/math',
+            'chat': '/api/chat',
+            'math': '/api/math/solve',
+            'ocr': '/api/ocr/convert',
             'resources': '/api/resources',
-            'documents': '/api/documents'
         }
     })
 
