@@ -24,6 +24,7 @@ from routes.ai_chat import ai_chat_bp
 from routes.ocr import ocr_bp
 from routes.solver import solver_bp
 from routes.resources import resources_bp
+from routes.document_generator import doc_generator_bp
 
 # Register blueprints
 app.register_blueprint(auth_bp)
@@ -31,6 +32,7 @@ app.register_blueprint(ai_chat_bp)
 app.register_blueprint(ocr_bp)
 app.register_blueprint(solver_bp)
 app.register_blueprint(resources_bp)
+app.register_blueprint(doc_generator_bp)
 
 @app.route('/')
 def home():
