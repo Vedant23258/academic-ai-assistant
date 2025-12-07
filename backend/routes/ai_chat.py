@@ -19,6 +19,7 @@ def chat():
     try:
         data = request.json
         user_message = data.get('message')
+            conversation_history = data.get('conversationHistory', [])
         if not user_message:
             return jsonify({"error": "Message required"}), 400
 
@@ -27,7 +28,7 @@ def chat():
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
-            ],
+            ],messages = [{"role": "system", "content": system_prompt}] + conversation_history + [{"role": "user", "content": user_message}]
             max_tokens=250,
             temperature=0.9
         )
